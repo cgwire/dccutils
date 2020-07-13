@@ -1,4 +1,5 @@
-# DCC Utils
+DCC Utils
+---------
 
 This library offers a series of class to abstract the most common features in
 Digital Content Creation tools.
@@ -6,10 +7,14 @@ Digital Content Creation tools.
 It currently supports Blender, Maya and Houdini.
 
 
-Contribution
-------------
+Contributions
+-------------
 
-We are opened to contribution to this repository.
+All contributions are welcome as long as they respect the `C4
+contract <https://rfc.zeromq.org/spec:42/C4>`__.
+
+Code must follow the pep8 convention.
+
 
 About authors
 -------------
