@@ -1,8 +1,8 @@
 DCC Utils
 ---------
 
-This library offers a series of class to abstract the most common features in
-Digital Content Creation tools.
+This library offers a series of classes to abstract the most common features 
+available in Digital Content Creation tools.
 
 It currently supports Blender, Maya and Houdini.
 
