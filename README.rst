@@ -15,7 +15,7 @@ About authors
 -------------
 
 Gazu is written by CG Wire, a company based in France. We help indie creative 
-studios to manage their production and build pipeline efficiently.
+studios to pipeline and workflow efficiently.
 
 We apply software craftmanship principles as much as possible. We love
 coding and consider that strong quality and good developer experience
