@@ -3,7 +3,7 @@ Module that implements the software interface for Blender mode.
 """
 import bpy
 
-from gazupublisher.utils.dcc.software import SoftwareContext
+from .software import SoftwareContext
 
 
 class BlenderContext(SoftwareContext):
