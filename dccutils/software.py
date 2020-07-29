@@ -4,17 +4,16 @@ from different contexts (Standalone, Blender, Maya, ...).
 """
 
 
-class SoftwareContext:
+class SoftwareContext(object):
     def __init__(self):
         self.output_path = None
         self.camera = None
         self.extension = None
         self.color_space = None
 
-    def add_ui(self):
-        pass
-
-    def take_render_screenshot(self, output_path, extension, use_viewtransform=True, **kwargs):
+    def take_render_screenshot(
+        self, renderer, output_path, extension, use_viewtransform=True
+    ):
         """
         Take a rendered screenshot
         """
@@ -27,7 +26,7 @@ class SoftwareContext:
         pass
 
     def take_render_animation(
-        self, output_path, container, use_viewtransform=True
+        self, renderer, output_path, container, use_viewtransform=True
     ):
         """
         Take a rendered animation
@@ -66,10 +65,26 @@ class SoftwareContext:
         """
         pass
 
-    def get_current_color_space(self):
+    def get_current_color_space(self, **kwargs):
+        """
+        Return the current color space.
+        """
         pass
 
-    def set_camera(self, camera):
+    def set_current_color_space(self, color_space, **kwargs):
+        """
+        Set the current color space.
+        """
+        pass
+
+
+    def set_camera(self, camera, **kwargs):
+        pass
+
+    def get_available_renderers(self):
+        """
+        Return a list of renderers or of render nodes, depending on the context.
+        """
         pass
 
     @staticmethod
