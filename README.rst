@@ -12,13 +12,15 @@ How to use it
 
 Install the library:
 
-```
-pip install dccutils
-```
+.. code-block:: bash
+
+    pip install dccutils
+
 
 Then in your code (let's say you are working in blender):
 
 .. code-block:: python
+
     from dccutils import BlenderContext
 
     dcc_software_manager = BlenderContex()
