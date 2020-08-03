@@ -7,6 +7,24 @@ available in Digital Content Creation tools.
 It currently supports Blender, Maya and Houdini.
 
 
+How to use it
+-------------
+
+Install the library:
+
+```
+pip install dccutils
+```
+
+Then in your code (let's say you are working in blender):
+
+.. code-block:: python
+    from dccutils import BlenderContext
+
+    dcc_software_manager = BlenderContex()
+    dcc_software_manager.list_cameras()
+
+
 Contributions
 -------------
 
