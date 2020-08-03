@@ -15,7 +15,10 @@ class HoudiniContext(SoftwareContext):
             "ifd": {"name": "mantra", "parm_camera": "camera"},
             "opengl": {"name": "opengl", "parm_camera": "camera"},
             "rib": {"name": "renderman", "parm_camera": "camera"},
-            "Redshift_ROP": {"name": "redshift", "parm_camera": "RS_renderCamera"},
+            "Redshift_ROP": {
+                "name": "redshift",
+                "parm_camera": "RS_renderCamera",
+            },
             "vray_renderer": {"name": "vray", "parm_camera": "render_camera"},
         }
 

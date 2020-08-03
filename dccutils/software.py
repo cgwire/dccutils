@@ -1,6 +1,6 @@
 """
-Module that act as a (loose) interface. Its purpose is to uniform the results coming
-from different contexts (Standalone, Blender, Maya, ...).
+Module that act as a (loose) interface. Its purpose is to uniform the results
+coming from different contexts (Standalone, Blender, Maya, ...).
 """
 
 
@@ -51,17 +51,10 @@ class SoftwareContext(object):
         """
         pass
 
-    def list_cameras(self):
-        """
-        Return a list of tuple representing the cameras.
-        Each tuple contains a camera object and its name.
-        """
-        pass
-
     def list_extensions(self, is_video):
         """
-        Return a list of tuple representing the cameras.
-        Each tuple contains a camera object and its name.
+        Return a list of tuple representing the extensions.
+        Each tuple contains an extension object and its name.
         """
         pass
 
@@ -77,8 +70,14 @@ class SoftwareContext(object):
         """
         pass
 
-
     def set_camera(self, camera, **kwargs):
+        pass
+
+    def list_cameras(self):
+        """
+        Return a list of tuple representing the cameras.
+        Each tuple contains a camera object and its name.
+        """
         pass
 
     def get_available_renderers(self):
