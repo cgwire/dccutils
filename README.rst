@@ -17,14 +17,14 @@ Install the library:
     pip install dccutils
 
 
-Then in your code (let's say you are working in blender):
+Then in your code (let's say you are working in Blender):
 
 .. code-block:: python
 
-    from dccutils import BlenderContext
+    from dccutils.dcc_blender import BlenderContext
 
-    dcc_software_manager = BlenderContex()
-    dcc_software_manager.list_cameras()
+    dcc_software_manager = BlenderContext()
+    print(dcc_software_manager.list_cameras())
 
 
 Contributions
