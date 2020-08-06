@@ -12,7 +12,7 @@ class SoftwareContext(object):
         self.color_space = None
 
     def take_render_screenshot(
-        self, renderer, output_path, extension, use_viewtransform=True
+        self, renderer, output_path, extension, use_colorspace=True
     ):
         """
         Take a rendered screenshot
@@ -26,7 +26,7 @@ class SoftwareContext(object):
         pass
 
     def take_render_animation(
-        self, renderer, output_path, container, use_viewtransform=True
+        self, renderer, output_path, container, use_colorspace=True
     ):
         """
         Take a rendered animation

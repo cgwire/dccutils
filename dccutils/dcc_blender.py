@@ -16,11 +16,16 @@ class BlenderContext(SoftwareContext):
             screen = window.screen
             for area in screen.areas:
                 if area.type == "CONSOLE":
-                    override = {"window": window, "screen": screen, "area": area}
+                    override = {"window": window, "screen": screen,
+                                "area": area}
                     for line in str(data).split("\n"):
                         bpy.ops.console.scrollback_append(
                             override, text=str(line), type="OUTPUT"
                         )
+
+    @staticmethod
+    def get_blender_version():
+        return bpy.app.version
 
     def push_state(self):
         """
@@ -32,7 +37,9 @@ class BlenderContext(SoftwareContext):
         self.saved_codec = scene.render.ffmpeg.codec
         self.saved_format = scene.render.ffmpeg.format
         self.saved_camera = scene.camera
-        self.old_color_space = scene.sequencer_colorspace_settings.name
+        self.saved_color_space = scene.sequencer_colorspace_settings.name
+        self.renderer = scene.render.engine
+
 
     def pop_state(self):
         """
@@ -43,8 +50,9 @@ class BlenderContext(SoftwareContext):
         scene.render.filepath = self.saved_output_path
         scene.render.ffmpeg.codec = self.saved_codec
         scene.render.ffmpeg.format = self.saved_format
+        scene.render.engine = self.renderer
         scene.camera = self.saved_camera
-        scene.sequencer_colorspace_settings.name = self.old_color_space
+        scene.sequencer_colorspace_settings.name = self.saved_color_space
 
     def setup_preview(self, output_path, extension):
         """
@@ -54,6 +62,17 @@ class BlenderContext(SoftwareContext):
         """
         bpy.context.scene.render.image_settings.file_format = extension
         bpy.context.scene.render.filepath = output_path
+
+    def setup_render(self, renderer):
+        """
+        Setup render.
+        :param renderer: Id of the renderer in Blender
+        """
+        bpy.context.scene.render.engine = renderer
+
+    def setup_colorspace_settings(self, use_colorspace):
+        colorspace = self.get_current_color_space() if use_colorspace else "sRGB"
+        self.set_current_color_space(colorspace)
 
     def setup_preview_animation(self, output_path, extension, container):
         """
@@ -68,13 +87,15 @@ class BlenderContext(SoftwareContext):
         bpy.context.scene.render.ffmpeg.format = container
 
     def take_render_screenshot(
-        self, output_path, extension, use_viewtransform=True
+            self, renderer, output_path, extension, use_colorspace=True
     ):
         """
-        Take a screenshot using Cycles.
+        Take a screenshot using given renderer.
         Save the image at the given path with the given extension.
         """
+        self.setup_render(renderer)
         self.setup_preview(output_path, extension)
+        self.setup_colorspace_settings(use_colorspace)
         bpy.ops.render.render(write_still=True)
         self.software_print("Generated screenshot at path " + output_path)
 
@@ -84,17 +105,23 @@ class BlenderContext(SoftwareContext):
         Save the image at the given path with the given extension.
         """
         self.setup_preview(output_path, extension)
-        bpy.ops.render.opengl(write_still=True)
+        if self.get_blender_version() < (2, 80, 0):
+            bpy.ops.render.opengl(write_still=True)
+        else:
+            bpy.context.scene.view_settings.view_transform = 'Standard'
+            bpy.ops.render.opengl(write_still=True)
         self.software_print("Generated screenshot at path " + output_path)
 
     def take_render_animation(
-        self, output_path, container, use_viewtransform=True
+            self, renderer, output_path, container, use_colorspace=True
     ):
         """
-        Take an animation using Cycles.
+        Take an animation using given renderer.
         Save the video at the given path with the given extension (container).
         """
+        self.setup_render(renderer)
         self.setup_preview_animation(output_path, "FFMPEG", container)
+        self.setup_colorspace_settings(use_colorspace)
         bpy.ops.render.render(animation=True, write_still=True)
         self.software_print("Generated animation at path " + output_path)
 
@@ -104,7 +131,11 @@ class BlenderContext(SoftwareContext):
         Save the video at the given path with the given extension (container).
         """
         self.setup_preview_animation(output_path, "FFMPEG", container)
-        bpy.ops.render.opengl(animation=True, write_still=True)
+        if self.get_blender_version() < (2, 80, 0):
+            bpy.ops.render.opengl(animation=True, write_still=True)
+        else:
+            bpy.context.scene.view_settings.view_transform = 'Standard'
+            bpy.ops.render.opengl(animation=True, write_still=True)
         self.software_print("Generated animation at path " + output_path)
 
     def list_cameras(self):
@@ -118,7 +149,7 @@ class BlenderContext(SoftwareContext):
                 cameras.append((obj.name, obj))
         return cameras
 
-    def set_camera(self, camera):
+    def set_camera(self, camera, **kwargs):
         """
         Set the rendering camera.
         Check first if the camera is well-defined.
@@ -134,17 +165,48 @@ class BlenderContext(SoftwareContext):
         return bpy.context.scene
 
     def get_current_color_space(self):
+        """
+        Return the current color space.
+        """
         scene = self.get_current_scene()
         return scene.sequencer_colorspace_settings.name
 
-    def set_current_color_space(self, color_space):
+    def set_current_color_space(self, color_space, **kwargs):
+        """
+        Set the current color space.
+        """
         scene = self.get_current_scene()
         scene.sequencer_colorspace_settings.name = color_space
 
+    def get_available_renderers(self):
+        """
+        Return a list of ids of available renderers.
+        For now there is no function from the Blender API to retrieve all the
+        renderers, which leads to some workaround.
+        """
+        # Get all the render registered as subclasses of RenderEngine class.
+        # This does not include the internal renderers of Blender, only those
+        # registered with Python add-ons (by the user or Blender directly)
+        renderers = bpy.types.RenderEngine.__subclasses__()
+        external_renderer_ids = [(r.bl_label, r.bl_idname) for r in renderers]
+
+        # Get the internal renderers
+        rna_type = type(bpy.context.scene.render)
+        prop_str = "engine"
+        prop = rna_type.bl_rna.properties[prop_str]
+        internal_renderer_ids = [(e.name, e.identifier) for e in
+                                 prop.enum_items]
+
+        # For some reason this last procedure didn't include Blender_workbench
+        # So we add it manually.
+        internal_renderer_ids.append(("Workbench", "BLENDER_WORKBENCH"))
+
+        return external_renderer_ids + internal_renderer_ids
+
     def list_extensions(self, is_video):
         """
-        Return a list of available extensions along with the ID of their compression
-        algorithm in Blender.
+        Return a list of available extensions along with the ID of their
+        compression algorithm in Blender.
         """
         return (
             [(".mp4", "MPEG4"), (".mov", "QUICKTIME")]
