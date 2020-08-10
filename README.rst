@@ -23,7 +23,7 @@ Then in your code (let's say you are working in Blender):
 
     from dccutils import BlenderContext
 
-    dcc_software_manager = BlenderContext()
+    dcc_software_manager.blender = BlenderContext()
     print(dcc_software_manager.list_cameras())
 
 
