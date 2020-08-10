@@ -21,7 +21,7 @@ Then in your code (let's say you are working in Blender):
 
 .. code-block:: python
 
-    from dccutils.dcc_blender import BlenderContext
+    from dccutils import BlenderContext
 
     dcc_software_manager = BlenderContext()
     print(dcc_software_manager.list_cameras())
