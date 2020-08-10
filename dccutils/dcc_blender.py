@@ -16,8 +16,7 @@ class BlenderContext(SoftwareContext):
             screen = window.screen
             for area in screen.areas:
                 if area.type == "CONSOLE":
-                    override = {"window": window, "screen": screen,
-                                "area": area}
+                    override = {"window": window, "screen": screen, "area": area}
                     for line in str(data).split("\n"):
                         bpy.ops.console.scrollback_append(
                             override, text=str(line), type="OUTPUT"
@@ -39,7 +38,6 @@ class BlenderContext(SoftwareContext):
         self.saved_camera = scene.camera
         self.saved_color_space = scene.sequencer_colorspace_settings.name
         self.renderer = scene.render.engine
-
 
     def pop_state(self):
         """
@@ -87,7 +85,7 @@ class BlenderContext(SoftwareContext):
         bpy.context.scene.render.ffmpeg.format = container
 
     def take_render_screenshot(
-            self, renderer, output_path, extension, use_colorspace=True
+        self, renderer, output_path, extension, use_colorspace=True
     ):
         """
         Take a screenshot using given renderer.
@@ -108,12 +106,12 @@ class BlenderContext(SoftwareContext):
         if self.get_blender_version() < (2, 80, 0):
             bpy.ops.render.opengl(write_still=True)
         else:
-            bpy.context.scene.view_settings.view_transform = 'Standard'
+            bpy.context.scene.view_settings.view_transform = "Standard"
             bpy.ops.render.opengl(write_still=True)
         self.software_print("Generated screenshot at path " + output_path)
 
     def take_render_animation(
-            self, renderer, output_path, container, use_colorspace=True
+        self, renderer, output_path, container, use_colorspace=True
     ):
         """
         Take an animation using given renderer.
@@ -134,7 +132,7 @@ class BlenderContext(SoftwareContext):
         if self.get_blender_version() < (2, 80, 0):
             bpy.ops.render.opengl(animation=True, write_still=True)
         else:
-            bpy.context.scene.view_settings.view_transform = 'Standard'
+            bpy.context.scene.view_settings.view_transform = "Standard"
             bpy.ops.render.opengl(animation=True, write_still=True)
         self.software_print("Generated animation at path " + output_path)
 
@@ -194,8 +192,7 @@ class BlenderContext(SoftwareContext):
         rna_type = type(bpy.context.scene.render)
         prop_str = "engine"
         prop = rna_type.bl_rna.properties[prop_str]
-        internal_renderer_ids = [(e.name, e.identifier) for e in
-                                 prop.enum_items]
+        internal_renderer_ids = [(e.name, e.identifier) for e in prop.enum_items]
 
         # For some reason this last procedure didn't include Blender_workbench
         # So we add it manually.
