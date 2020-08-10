@@ -1,4 +1,4 @@
-release_number=0.1.0
+release_number=$1
 twine --help || exit 1
 echo "__version__ = \"$release_number\"" > dccutils/__version__.py
 git add dccutils/__version__.py 
