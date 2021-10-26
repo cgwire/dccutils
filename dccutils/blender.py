@@ -152,11 +152,18 @@ class BlenderContext(SoftwareContext):
         Set the rendering camera.
         Check first if the camera is well-defined.
         """
-        assert camera is not None
-        list_camera_object = [
-            camera_obj for _, camera_obj in self.list_cameras()
-        ]
-        assert camera in list_camera_object
+        # we can search by name because names are unique in bpy.data.objects
+        if isinstance(camera, str):
+            camera = bpy.data.objects.get(camera)
+            if camera is None:
+                raise TypeError("Camera object not found")
+        elif isinstance(camera, bpy.types.Object):
+            if camera not in bpy.data.objects.values():
+                raise TypeError("Camera object not found")
+        else:
+            raise TypeError("Camera parameter must be a str or a bpy.types.Object type")
+        if camera.type != 'CAMERA':
+            raise TypeError("Object is not of type CAMERA")
         bpy.context.scene.camera = camera
 
     def get_current_scene(self):
