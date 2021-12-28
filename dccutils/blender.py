@@ -24,7 +24,7 @@ class BlenderContext(SoftwareContext):
 
     @staticmethod
     def get_dcc_version():
-        return bpy.app.version
+        return ".".join(str(v) for v in bpy.app.version)
 
     @staticmethod
     def get_dcc_name():
