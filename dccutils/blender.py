@@ -30,7 +30,7 @@ class BlenderContext(SoftwareContext):
     def get_dcc_name():
         return "Blender"
 
-    def get_filepath():
+    def get_filepath(self):
         return bpy.data.filepath
 
     def push_state(self):
