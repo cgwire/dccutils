@@ -60,9 +60,7 @@ class HoudiniContext(SoftwareContext):
         desktop = cur_desktop.name()
         panetab = cur_desktop.paneTabOfType(hou.paneTabType.SceneViewer).name()
         persp = (
-            cur_desktop.paneTabOfType(hou.paneTabType.SceneViewer)
-            .curViewport()
-            .name()
+            cur_desktop.paneTabOfType(hou.paneTabType.SceneViewer).curViewport().name()
         )
         camera_path = desktop + "." + panetab + "." + "world" "." + persp
         return camera_path
@@ -75,8 +73,7 @@ class HoudiniContext(SoftwareContext):
         camera_path = self.get_viewport_camera()
         frame = hou.frame()
         hou.hscript(
-            "viewwrite -f %d %d %s '%s'"
-            % (frame, frame, camera_path, output_path)
+            "viewwrite -f %d %d %s '%s'" % (frame, frame, camera_path, output_path)
         )
         self.software_print("Generated screenshot at path " + output_path)
 
