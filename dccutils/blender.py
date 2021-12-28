@@ -23,8 +23,15 @@ class BlenderContext(SoftwareContext):
                         )
 
     @staticmethod
-    def get_blender_version():
+    def get_dcc_version():
         return bpy.app.version
+
+    @staticmethod
+    def get_dcc_name():
+        return "Blender"
+
+    def get_filepath():
+        return bpy.data.filepath
 
     def push_state(self):
         """
@@ -136,7 +143,7 @@ class BlenderContext(SoftwareContext):
             bpy.ops.render.opengl(animation=True, write_still=True)
         self.software_print("Generated animation at path " + output_path)
 
-    def list_cameras(self):
+    def list_cameras(self, objects=False):
         """
         Return a list of tuple representing the Blender cameras.
         Each tuple contains a camera object and its name.
@@ -144,7 +151,7 @@ class BlenderContext(SoftwareContext):
         cameras = []
         for obj in bpy.data.objects:
             if obj.type == "CAMERA":
-                cameras.append((obj.name, obj))
+                cameras.append((obj.name, obj) if objects else obj.name)
         return cameras
 
     def set_camera(self, camera, **kwargs):
@@ -162,7 +169,7 @@ class BlenderContext(SoftwareContext):
                 raise TypeError("Camera object not found")
         else:
             raise TypeError("Camera parameter must be a str or a bpy.types.Object type")
-        if camera.type != 'CAMERA':
+        if camera.type != "CAMERA":
             raise TypeError("Object is not of type CAMERA")
         bpy.context.scene.camera = camera
 
