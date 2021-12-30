@@ -39,9 +39,7 @@ class MayaContext(SoftwareContext):
         """
         string_ext, id_ext = extension
         self.set_current_id_extension(int(id_ext))
-        cmds.setAttr(
-            "defaultRenderGlobals.imageFilePrefix", output_path, type="string"
-        )
+        cmds.setAttr("defaultRenderGlobals.imageFilePrefix", output_path, type="string")
         camera = self.get_camera()
         layer = "-layer defaultRenderLayer "
         if self.is_color_management_available(renderer):
@@ -56,9 +54,7 @@ class MayaContext(SoftwareContext):
             from mtoa.cmds.arnoldRender import arnoldRender
 
             string_ext = "jpeg" if string_ext == "jpg" else string_ext
-            cmds.setAttr(
-                "defaultArnoldDriver.ai_translator", string_ext, type="string"
-            )
+            cmds.setAttr("defaultArnoldDriver.ai_translator", string_ext, type="string")
             path_without_extension = os.path.splitext(output_path)[0]
             cmds.setAttr(
                 "defaultArnoldDriver.pre", path_without_extension, type="string"
@@ -179,9 +175,7 @@ class MayaContext(SoftwareContext):
         res = []
         camera_names = cmds.listCameras()
         for camera_name in camera_names:
-            camera_shape = cmds.listRelatives(
-                camera_name, type="camera", s=True
-            )[0]
+            camera_shape = cmds.listRelatives(camera_name, type="camera", s=True)[0]
             res.append((camera_name, camera_shape))
         return res
 
@@ -216,9 +210,7 @@ class MayaContext(SoftwareContext):
         res = []
         renderers = cmds.renderer(query=True, namesOfAvailableRenderers=True)
         for renderer in renderers:
-            renderer_ui_name = cmds.renderer(
-                renderer, query=True, rendererUIName=True
-            )
+            renderer_ui_name = cmds.renderer(renderer, query=True, rendererUIName=True)
             res.append((renderer_ui_name, renderer))
         return res
 
