@@ -76,7 +76,16 @@ class BlenderContext(SoftwareContext):
         bpy.context.scene.render.engine = renderer
 
     def setup_colorspace_settings(self, use_colorspace):
-        colorspace = self.get_current_color_space() if use_colorspace else "sRGB"
+        if use_colorspace:
+            colorspace = self.get_current_color_space()
+        else:  # to change to use custom colorspace
+            for enum_colorspace in (
+                type(bpy.context.scene.sequencer_colorspace_settings)
+                .bl_rna.properties["name"]
+                .enum_items
+            ):
+                if "sRGB".lower() in enum_colorspace.name.lower():
+                    colorspace = enum_colorspace.name
         self.set_current_color_space(colorspace)
 
     def setup_preview_animation(self, output_path, extension, container):
