@@ -6,10 +6,28 @@ coming from different contexts (Standalone, Blender, Maya, ...).
 
 class SoftwareContext(object):
     def __init__(self):
-        self.output_path = None
         self.camera = None
-        self.extension = None
-        self.color_space = None
+
+    @staticmethod
+    def get_dcc_version():
+        """
+        Get DCC version
+        """
+        return None
+
+    @staticmethod
+    def get_dcc_name():
+        """
+        Get DCC name
+        """
+        return "Software"
+
+    @staticmethod
+    def get_current_project_path():
+        """
+        Get current project path
+        """
+        return None
 
     def take_render_screenshot(
         self, renderer, output_path, extension, use_colorspace=True
@@ -51,7 +69,7 @@ class SoftwareContext(object):
         """
         pass
 
-    def list_extensions(self, is_video):
+    def get_extensions(self, is_video):
         """
         Return a list of tuple representing the extensions.
         Each tuple contains an extension object and its name.
@@ -71,9 +89,12 @@ class SoftwareContext(object):
         pass
 
     def set_camera(self, camera, **kwargs):
+        """
+        Set the camera
+        """
         pass
 
-    def list_cameras(self):
+    def get_cameras(self):
         """
         Return a list of tuple representing the cameras.
         Each tuple contains a camera object and its name.

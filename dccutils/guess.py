@@ -17,4 +17,9 @@ except:
 
             GuessedContext = MayaContext
         except:
-            pass
+            try:
+                from .unreal import UnrealContext
+
+                GuessedContext = UnrealContext
+            except:
+                pass

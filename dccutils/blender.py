@@ -4,6 +4,7 @@ Module that implements the software interface for Blender mode.
 import bpy
 
 from .software import SoftwareContext
+from .exceptions import CameraNotFound
 
 
 class BlenderContext(SoftwareContext):
@@ -16,7 +17,11 @@ class BlenderContext(SoftwareContext):
             screen = window.screen
             for area in screen.areas:
                 if area.type == "CONSOLE":
-                    override = {"window": window, "screen": screen, "area": area}
+                    override = {
+                        "window": window,
+                        "screen": screen,
+                        "area": area,
+                    }
                     for line in str(data).split("\n"):
                         bpy.ops.console.scrollback_append(
                             override, text=str(line), type="OUTPUT"
@@ -30,7 +35,8 @@ class BlenderContext(SoftwareContext):
     def get_dcc_name():
         return "Blender"
 
-    def get_filepath(self):
+    @staticmethod
+    def get_current_project_path():
         return bpy.data.filepath
 
     def push_state(self):
@@ -101,7 +107,7 @@ class BlenderContext(SoftwareContext):
         bpy.context.scene.render.ffmpeg.format = container
 
     def take_render_screenshot(
-        self, renderer, output_path, extension, use_colorspace=True
+        self, renderer, output_path, extension, use_colorspace=True, **kwargs
     ):
         """
         Take a screenshot using given renderer.
@@ -111,9 +117,9 @@ class BlenderContext(SoftwareContext):
         self.setup_preview(output_path, extension)
         self.setup_colorspace_settings(use_colorspace)
         bpy.ops.render.render(write_still=True)
-        self.software_print("Generated screenshot at path " + output_path)
+        return output_path
 
-    def take_viewport_screenshot(self, output_path, extension):
+    def take_viewport_screenshot(self, output_path, extension, **kwargs):
         """
         Take a screenshot using OpenGL.
         Save the image at the given path with the given extension.
@@ -124,63 +130,61 @@ class BlenderContext(SoftwareContext):
         else:
             bpy.context.scene.view_settings.view_transform = "Standard"
             bpy.ops.render.opengl(write_still=True)
-        self.software_print("Generated screenshot at path " + output_path)
+        return output_path
 
     def take_render_animation(
-        self, renderer, output_path, container, use_colorspace=True
+        self, renderer, output_path, extension, use_colorspace=True, **kwargs
     ):
         """
         Take an animation using given renderer.
         Save the video at the given path with the given extension (container).
         """
         self.setup_render(renderer)
-        self.setup_preview_animation(output_path, "FFMPEG", container)
+        self.setup_preview_animation(output_path, "FFMPEG", extension)
         self.setup_colorspace_settings(use_colorspace)
         bpy.ops.render.render(animation=True, write_still=True)
-        self.software_print("Generated animation at path " + output_path)
+        return output_path
 
-    def take_viewport_animation(self, output_path, container):
+    def take_viewport_animation(self, output_path, extension, **kwargs):
         """
         Take an animation using OpenGL.
         Save the video at the given path with the given extension (container).
         """
-        self.setup_preview_animation(output_path, "FFMPEG", container)
+        self.setup_preview_animation(output_path, "FFMPEG", extension)
         if self.get_blender_version() < (2, 80, 0):
             bpy.ops.render.opengl(animation=True, write_still=True)
         else:
             bpy.context.scene.view_settings.view_transform = "Standard"
             bpy.ops.render.opengl(animation=True, write_still=True)
-        self.software_print("Generated animation at path " + output_path)
+        return output_path
 
-    def list_cameras(self, objects=False):
+    def get_cameras(self, with_objects=False):
         """
         Return a list of tuple representing the Blender cameras.
         Each tuple contains a camera object and its name.
         """
-        cameras = []
-        for obj in bpy.data.objects:
-            if obj.type == "CAMERA":
-                cameras.append((obj.name, obj) if objects else obj.name)
-        return cameras
+        return [
+            (obj.name, obj) if with_objects else obj.name
+            for obj in bpy.data.objects
+            if obj.type == "CAMERA"
+        ]
 
     def set_camera(self, camera, **kwargs):
         """
         Set the rendering camera.
         Check first if the camera is well-defined.
         """
-        # we can search by name because names are unique in bpy.data.objects
+        camera_found = None
         if isinstance(camera, str):
-            camera = bpy.data.objects.get(camera)
-            if camera is None:
-                raise TypeError("Camera object not found")
+            camera_found = bpy.data.objects.get(camera)
         elif isinstance(camera, bpy.types.Object):
-            if camera not in bpy.data.objects.values():
-                raise TypeError("Camera object not found")
-        else:
-            raise TypeError("Camera parameter must be a str or a bpy.types.Object type")
-        if camera.type != "CAMERA":
-            raise TypeError("Object is not of type CAMERA")
-        bpy.context.scene.camera = camera
+            if camera in bpy.data.objects.values():
+                camera_found = camera
+        if camera_found is None or camera_found.type != "CAMERA":
+            raise CameraNotFound
+        self.camera = camera_found
+        bpy.context.scene.camera = self.camera
+        return self.camera
 
     def get_current_scene(self):
         return bpy.context.scene
@@ -215,15 +219,17 @@ class BlenderContext(SoftwareContext):
         rna_type = type(bpy.context.scene.render)
         prop_str = "engine"
         prop = rna_type.bl_rna.properties[prop_str]
-        internal_renderer_ids = [(e.name, e.identifier) for e in prop.enum_items]
+        internal_renderer_ids = [
+            (e.name, e.identifier) for e in prop.enum_items
+        ]
 
         # For some reason this last procedure didn't include Blender_workbench
         # So we add it manually.
         internal_renderer_ids.append(("Workbench", "BLENDER_WORKBENCH"))
 
-        return external_renderer_ids + internal_renderer_ids
+        return (external_renderer_ids + internal_renderer_ids)[::-1]
 
-    def list_extensions(self, is_video):
+    def get_extensions(self, is_video):
         """
         Return a list of available extensions along with the ID of their
         compression algorithm in Blender.
