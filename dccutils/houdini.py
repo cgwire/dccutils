@@ -3,7 +3,6 @@ Module that implements the software interface for Houdini mode.
 """
 
 import hou
-import os
 
 from .software import SoftwareContext
 
@@ -60,7 +59,9 @@ class HoudiniContext(SoftwareContext):
         desktop = cur_desktop.name()
         panetab = cur_desktop.paneTabOfType(hou.paneTabType.SceneViewer).name()
         persp = (
-            cur_desktop.paneTabOfType(hou.paneTabType.SceneViewer).curViewport().name()
+            cur_desktop.paneTabOfType(hou.paneTabType.SceneViewer)
+            .curViewport()
+            .name()
         )
         camera_path = desktop + "." + panetab + "." + "world" "." + persp
         return camera_path
@@ -73,7 +74,8 @@ class HoudiniContext(SoftwareContext):
         camera_path = self.get_viewport_camera()
         frame = hou.frame()
         hou.hscript(
-            "viewwrite -f %d %d %s '%s'" % (frame, frame, camera_path, output_path)
+            "viewwrite -f %d %d %s '%s'"
+            % (frame, frame, camera_path, output_path)
         )
         self.software_print("Generated screenshot at path " + output_path)
 
@@ -105,7 +107,7 @@ class HoudiniContext(SoftwareContext):
         """
         pass
 
-    def list_cameras(self):
+    def get_cameras(self):
         """
         Return a list of tuple representing the Houdini cameras.
         Each tuple contains a camera node and its name.
@@ -142,7 +144,7 @@ class HoudiniContext(SoftwareContext):
                 render_nodes.append((node.name(), node))
         return render_nodes
 
-    def list_extensions(self, is_video):
+    def get_extensions(self, is_video):
         """
         Return a list of available extensions.
         """
