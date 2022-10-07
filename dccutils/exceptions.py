@@ -12,3 +12,19 @@ class SequenceNotFound(Exception):
     """
 
     pass
+
+
+class ScreenshotAlreadyInProgress(Exception):
+    """
+    Error raised when an other screenshot is already in progress.
+    """
+
+    pass
+
+
+class MovieAlreadyInProgress(Exception):
+    """
+    Error raised when an other movie is already in progress.
+    """
+
+    pass
